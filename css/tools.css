@@ -1,0 +1,32 @@
+/* Новые инструменты: шаблоны сообщений, поиск, итоги недели */
+.tpl-bar { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin: 4px 0 18px; }
+.tpl-bar .field { flex: 1 1 280px; margin: 0; }
+.tpl { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 14px 16px; margin: 10px 0; }
+.tpl-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.tpl-holes { font-size: 12px; font-weight: 700; color: var(--tip); white-space: nowrap; }
+.tpl-use { font-size: 13px; margin-top: 2px; }
+.tpl-text { margin: 10px 0; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--surface-2); line-height: 1.5; white-space: pre-wrap; user-select: all; }
+.tpl-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tpl-sub { margin: 14px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.tpl-modal { max-height: 60vh; overflow-y: auto; }
+
+.search-box .input { width: 100%; margin-bottom: 10px; }
+.search-list { max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.search-list .row { cursor: pointer; }
+.search-list .row.is-active { background: var(--accent-soft); outline: 1px solid var(--accent); }
+
+.week-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px; }
+.week-nav strong { font-size: 16px; }
+.week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 10px 0 18px; }
+.week-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 14px 16px; }
+.week-card .num { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+.week-card .lbl { color: var(--muted); font-size: 13px; }
+.delta { font-size: 12px; font-weight: 700; margin-left: 6px; }
+.delta.up { color: var(--accent); }
+.delta.down { color: var(--dont); }
+.week-note { border-left: 3px solid var(--tip); padding: 8px 14px; background: var(--surface-2); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 10px 0 18px; }
+
+.lead-head .quick { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 10px; }
+
+.backup-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 20px; background: var(--surface-2); border-bottom: 1px solid var(--line); font-size: 14px; }
+.backup-bar span { flex: 1 1 260px; color: var(--muted); }

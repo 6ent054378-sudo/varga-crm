@@ -1,0 +1,39 @@
+/* Разговоры: запись, расшифровка, разбор */
+.calls-status { margin: 0 0 14px; }
+.calls-error { color: var(--danger); font-weight: 600; margin: 10px 0 0; }
+.calls-new { max-width: 760px; margin-bottom: 24px; }
+.calls-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 14px; }
+.calls-file { display: none; }
+.calls-live { display: flex; align-items: center; gap: 10px; font-size: 18px; }
+.calls-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--danger); animation: calls-pulse 1.2s infinite; }
+@keyframes calls-pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 123, 110, .6); } 70% { box-shadow: 0 0 0 12px rgba(255, 123, 110, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 123, 110, 0); } }
+@media (prefers-reduced-motion: reduce) { .calls-dot { animation: none; } }
+.calls-timer { font-size: 56px; font-weight: 800; letter-spacing: -0.02em; margin: 8px 0; font-variant-numeric: tabular-nums; }
+.calls-meter { height: 10px; background: var(--line); border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+.calls-meter-fill { height: 100%; width: 0; background: var(--accent); transition: width .15s; }
+.calls-steps { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.calls-step { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); }
+.calls-step-mark { min-width: 56px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.calls-step.is-run .calls-step-mark { color: var(--accent); }
+.calls-step.is-ok .calls-step-mark { color: var(--ok); }
+
+.calls-result { display: flex; flex-direction: column; gap: 16px; max-width: 900px; }
+.calls-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+.calls-head h2 { margin: 2px 0 0; font-size: 24px; }
+.calls-lead { margin: 0; min-width: 220px; }
+.calls-text { font-size: 14px; line-height: 1.5; }
+.calls-rows { display: flex; flex-direction: column; margin-bottom: 10px; }
+.calls-row { display: grid; grid-template-columns: 22px minmax(140px, 220px) minmax(0, 1fr); gap: 10px; align-items: start; padding: 9px 0; border-top: 1px solid var(--line); cursor: pointer; }
+.calls-row:first-child { border-top: 0; }
+.calls-row input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--accent); }
+.calls-row-label { color: var(--muted); }
+.calls-row-val { display: flex; flex-direction: column; gap: 2px; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.calls-old { font-weight: 400; text-decoration: line-through; }
+.calls-score { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.calls-score-n { font-size: 44px; font-weight: 800; color: var(--accent); line-height: 1; }
+.calls-check { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; }
+.calls-check li { display: flex; gap: 10px; align-items: center; }
+.calls-mark { min-width: 34px; text-align: center; font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.calls-check .is-yes .calls-mark { background: var(--ok-soft); color: var(--ok); }
+.calls-check .is-no .calls-mark { background: var(--danger-soft); color: var(--danger); }
+@media (max-width: 560px) { .calls-row { grid-template-columns: 22px minmax(0, 1fr); } .calls-row-val { grid-column: 2; } .calls-timer { font-size: 44px; } }

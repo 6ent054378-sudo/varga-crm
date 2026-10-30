@@ -1,0 +1,16 @@
+/* Генератор КП: форма слева, предпросмотр справа */
+.kp-layout { display: grid; grid-template-columns: minmax(340px, 440px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.kp-left { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.kp-toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+.kp-status { margin: 0; min-height: 22px; }
+.kp-form { display: flex; flex-direction: column; gap: 10px; }
+.kp-sec { padding: 14px 18px; }
+.kp-sec > summary { cursor: pointer; font-weight: 700; font-size: 16px; padding: 4px 0; }
+.kp-sec[open] > summary { margin-bottom: 10px; }
+.kp-right { position: sticky; top: 76px; }
+.kp-frame { width: 100%; height: calc(100vh - 110px); min-height: 520px; border: 1px solid var(--line); border-radius: var(--radius); background: #0b1214; }
+@media (max-width: 1100px) {
+  .kp-layout { grid-template-columns: 1fr; }
+  .kp-right { position: static; }
+  .kp-frame { height: 80vh; }
+}
