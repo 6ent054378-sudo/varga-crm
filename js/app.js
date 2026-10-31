@@ -195,7 +195,18 @@
     );
   }
 
+  function syncWarning() {
+    var st = C.sync && C.sync.status ? C.sync.status() : null;
+    if (!st || !st.error) return null;
+    return h('div', { class: 'warn-bar' },
+      h('span', { text: 'Нет связи с облаком: ' + st.error + '. Заявки с других устройств могут не прийти.' }),
+      h('button', { type: 'button', class: 'btn btn-small', onClick: function () { C.sync.pull(0).then(render); } }, 'Повторить')
+    );
+  }
+
   function warning() {
+    var syncBar = syncWarning();
+    if (syncBar) return syncBar;
     if (C.storage.available) return null;
     if (C.storage.full) return h('div', { class: 'warn-bar', text: 'В браузере кончилось место, новые данные не сохраняются. Скачай копию и удали старые разговоры.' });
     return h('div', { class: 'warn-bar', text: 'Браузер не сохраняет данные: всё пропадёт после закрытия вкладки. Открой в Chrome в обычном окне.' });
@@ -216,7 +227,7 @@
     if (info.snoozed || (info.days !== null && info.days < 7)) return null;
     var text = info.days === null ? 'Резервной копии ещё не было.' : 'Резервной копии не было ' + info.days + ' дн.';
     var bar = h('div', { class: 'backup-bar' },
-      h('span', { text: text + ' Данные хранятся только в этом браузере.' }),
+      h('span', { text: text + ' Данные в облаке, копия — страховка.' }),
       h('button', { type: 'button', class: 'btn btn-small btn-primary', onClick: function () { C.storage.download(store.snapshot()); render(); } }, 'Скачать копию'),
       h('button', { type: 'button', class: 'btn btn-small', onClick: function () { C.storage.snoozeBackup(1); render(); } }, 'Завтра')
     );
@@ -310,6 +321,10 @@
 
   function init() {
     mount = document.getElementById('app');
+    // Telegram добавляет в адрес свои параметры запуска: #tgWebAppData=... — это не экран CRM.
+    if (/^#tgWebAppData/i.test(window.location.hash)) {
+      try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { /* старый WebView */ }
+    }
     store.init();
     window.addEventListener('hashchange', render);
     if (!init.hot) { init.hot = true; document.addEventListener('keydown', onHotkey); }
@@ -326,6 +341,7 @@
     C.auth.ready().then(function (ok) {
       if (!ok) return;
       render();
+      C.sync.onError(render);
       C.sync.start();
     });
   }

@@ -12,9 +12,10 @@
       var saved = window.localStorage.getItem('marketing_crm_api_v1');
       if (saved) return String(saved).replace(/\/+$/, '');
     } catch (e) { /* приватный режим */ }
-    var host = window.location.hostname;
-    if (/(^|\.)github\.io$/.test(host) || /(^|\.)pages\.dev$/.test(host)) return DEFAULT_API;
-    return '';
+    // Одно облако для всех: и на github.io, и на локальном сервере.
+    // Иначе локальная копия живёт в своей localStorage и расходится с телефоном.
+    if (window.location.protocol === 'file:') return '';
+    return DEFAULT_API;
   }
 
   function token() {

@@ -25,6 +25,32 @@
   var intakeStarted = false;
   var lastError = '';
   var lastSync = '';
+  var onError = null;
+  var retryTimer = null;
+
+  // Ошибку связи показываем в интерфейсе, а не молчим пустым списком.
+  function humanError(message) {
+    var text = String(message || '');
+    if (/401|403/.test(text)) return 'сессия истекла, войди заново';
+    if (/Failed to fetch|NetworkError|Load failed/i.test(text)) return 'нет связи с сервером';
+    return text;
+  }
+
+  function setError(message) {
+    var next = humanError(message);
+    if (next === lastError) return;
+    lastError = next;
+    if (onError) onError(next);
+  }
+
+  function retrySoon() {
+    if (retryTimer || !running) return;
+    retryTimer = setTimeout(function () {
+      retryTimer = null;
+      if (!running) return;
+      pull(cursor).then(function () { flush(); });
+    }, 5000);
+  }
 
   function now() { return Date.now() + offset; }
 
@@ -190,7 +216,7 @@
             if (out.deleted[d.id] && out.deleted[d.id].updatedAt === sentDels[d.id]) delete out.deleted[d.id];
           });
           lastSync = new Date().toISOString();
-          lastError = '';
+          setError('');
           applyConflicts(body.conflicts);
         });
     }
@@ -209,7 +235,8 @@
     }
 
     return chain.catch(function (e) {
-      lastError = e && e.message ? e.message : 'Нет связи';
+      setError(e && e.message ? e.message : 'Нет связи');
+      retrySoon();
     }).then(function () {
       flushing = false;
       save();
@@ -267,14 +294,15 @@
         store.hydrate(snapshot);
         buildKnown();
         lastSync = new Date().toISOString();
-        lastError = '';
+        setError('');
 
         var fresh = (body.leads || []).filter(function (item) { return !before[item.id]; });
         if (firstPullDone && fresh.length) C.notify.newLeads(fresh);
         return body;
       })
       .catch(function (e) {
-        lastError = e && e.message ? e.message : 'Нет связи';
+        setError(e && e.message ? e.message : 'Нет связи');
+        retrySoon();
         return null;
       });
   }
@@ -345,6 +373,7 @@
 
   C.sync = {
     start: start, stop: stop, flush: flush, pull: pull,
+    onError: function (fn) { onError = fn; },
     status: function () { return { running: running, error: lastError, at: lastSync, cursor: cursor, pending: Object.keys(out.leads).length + Object.keys(out.deleted).length + (out.settings ? 1 : 0) }; },
     onPersist: onPersist
   };
