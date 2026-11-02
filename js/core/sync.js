@@ -27,6 +27,7 @@
   var lastSync = '';
   var onError = null;
   var retryTimer = null;
+  var importing = false;
 
   // Ошибку связи показываем в интерфейсе, а не молчим пустым списком.
   function humanError(message) {
@@ -140,12 +141,18 @@
       enqueueLead(lead);
       known[lead.id] = json;
     });
-    Object.keys(known).forEach(function (id) {
-      if (!current[id]) {
-        enqueueDelete(id);
-        delete known[id];
-      }
-    });
+    // Пустой список лидов — это сбой кэша или импорт, а не желание удалить всех клиентов.
+    // Удаления в таком состоянии не отправляем, иначе одно устройство сносит базу.
+    var empty = !Object.keys(current).length && Object.keys(known).length > 0;
+    if (!importing && !empty) {
+      Object.keys(known).forEach(function (id) {
+        if (!current[id]) {
+          enqueueDelete(id);
+          delete known[id];
+        }
+      });
+    }
+    importing = false;
     var payload = settingsOf(state);
     var sjson = stable(payload);
     if (sjson !== knownSettings) {
@@ -207,7 +214,17 @@
     var chain = Promise.resolve();
     if (leads.length || dels.length) {
       chain = C.auth.fetch('/api/leads', { method: 'POST', body: { leads: leads, deleted: dels } })
-        .then(function (r) { if (!r.ok) throw new Error('sync ' + r.status); return r.json(); })
+        .then(function (r) {
+          if (r.status === 409) {
+            // Сервер защитил базу от массового удаления: отменяем локальные удаления.
+            out.deleted = {};
+            save();
+            setError('удаление остановлено: сервер вернул заявки');
+            return pull(0).then(function () { return { conflicts: [] }; });
+          }
+          if (!r.ok) throw new Error('sync ' + r.status);
+          return r.json();
+        })
         .then(function (body) {
           leads.forEach(function (l) {
             if (out.leads[l.id] && out.leads[l.id].updatedAt === sent[l.id]) delete out.leads[l.id];
@@ -224,7 +241,17 @@
     if (settings) {
       chain = chain.then(function () {
         return C.auth.fetch('/api/settings', { method: 'PUT', body: settings })
-          .then(function (r) { if (!r.ok) throw new Error('sync ' + r.status); return r.json(); })
+          .then(function (r) {
+          if (r.status === 409) {
+            // Сервер защитил базу от массового удаления: отменяем локальные удаления.
+            out.deleted = {};
+            save();
+            setError('удаление остановлено: сервер вернул заявки');
+            return pull(0).then(function () { return { conflicts: [] }; });
+          }
+          if (!r.ok) throw new Error('sync ' + r.status);
+          return r.json();
+        })
           .then(function (body) {
             if (out.settings && out.settings.updatedAt === sentSettingsAt) {
               if (body.updatedAt > sentSettingsAt) settingsUp = body.updatedAt;
@@ -374,6 +401,7 @@
   C.sync = {
     start: start, stop: stop, flush: flush, pull: pull,
     onError: function (fn) { onError = fn; },
+    beginImport: function () { importing = true; },
     status: function () { return { running: running, error: lastError, at: lastSync, cursor: cursor, pending: Object.keys(out.leads).length + Object.keys(out.deleted).length + (out.settings ? 1 : 0) }; },
     onPersist: onPersist
   };

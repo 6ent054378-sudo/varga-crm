@@ -122,6 +122,7 @@
           return;
         }
         if (window.confirm('Заменить текущие данные резервной копией? Сейчас клиентов: ' + store.leads().length)) {
+          if (C.sync && C.sync.beginImport) C.sync.beginImport();
           store.replaceAll(res.state);
           C.modal.close();
           render();
