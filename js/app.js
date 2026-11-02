@@ -80,6 +80,27 @@
 
   // Приём заявок с пульки: адрес воркера и ключ, ручной забор
   function intakeBlock() {
+    // В облаке заявки забирает сервер по расписанию: браузеру это больше не нужно.
+    if (C.auth.apiBase()) {
+      var status = h('p', { class: 'muted', text: 'Заявки с пульки забираются автоматически каждую минуту, даже если панель закрыта.' });
+      return h('details', { class: 'card' },
+        h('summary', { text: 'Заявки с пульки' }),
+        status,
+        h('button', {
+          type: 'button', class: 'btn',
+          onClick: function () {
+            status.textContent = 'Проверяю...';
+            C.auth.fetch('/api/intake/run', { method: 'POST' })
+              .then(function (r) { return r.json(); })
+              .then(function (res) {
+                status.textContent = res.ok ? 'Связь есть. Новых заявок: ' + res.added : 'Ошибка: ' + res.error;
+                if (res.added) render();
+              })
+              .catch(function (e) { status.textContent = 'Ошибка: ' + (e && e.message ? e.message : 'нет связи'); });
+          }
+        }, 'Забрать сейчас')
+      );
+    }
     var cfg = C.intake.settings();
     var url = h('input', { type: 'text', class: 'input', value: cfg.url, placeholder: 'https://pulka-leads.имя.workers.dev' });
     var key = h('input', { type: 'password', class: 'input', value: cfg.key, placeholder: 'Ключ из настроек воркера' });

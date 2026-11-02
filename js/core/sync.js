@@ -345,6 +345,9 @@
   function startIntake() {
     if (intakeStarted) return;
     intakeStarted = true;
+    // В облаке заявки с пульки забирает сервер. Если тянуть их ещё и из браузера,
+    // удалённая заявка возвращается как новая.
+    if (C.auth.apiBase()) return;
     loadConfig().then(function () {
       if (C.intake && C.app) C.intake.start(C.app.onIntake);
     });
